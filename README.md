@@ -1,4 +1,4 @@
-# MineSweeper-
+# MineSweeper
 A mine-sweeper game written in Haskell
 
 ## Minimum specifications:
@@ -15,3 +15,5 @@ A mine-sweeper game written in Haskell
  - [ ] AI Solver (that stops if it risk failing, but presents probability of success)
  - [ ] Celebration with fireworks and loud applause from audience when winning the game (loud, even when muting speakers) :D
 
+## Reference material
+Coding conventions: https://wiki.haskell.org/Programming_guidelines
