@@ -56,3 +56,12 @@ update grid (row, col, cont, stat)
         stat' = if isJust stat then fromJust stat else status cell
         (rs1, rs2) = splitAt row $ rows grid
         rs' = [head rs2 !!= (col, Cell cont' stat')]
+
+setCell :: Grid -> (Int, Int) -> Content -> Maybe Grid
+setCell grid (row, col) cont
+        | row > fst (size grid) = Nothing
+        | col > snd (size grid) = Nothing
+        | status cell == Open   = Nothing
+        | status cell == cont   = Nothing
+        | otherwise = update grid (row, col, Nothing, cont)
+    where cell  = rows grid !! row !! col
