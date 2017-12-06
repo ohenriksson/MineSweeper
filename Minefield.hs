@@ -24,12 +24,12 @@ data Status = Open | Closed | Flaged
 data Cell = Cell { content :: Content, status :: Status }
             deriving (Eq, Show)
 
-data Grid = Grid { rows :: [[Cell]], size :: (Int,Int)}
+data Grid = Grid { rows :: [[Cell]], size :: (Int,Int), mines :: Int}
             deriving (Eq, Show)
 
 
 emptyGrid :: (Int, Int) -> Grid
-emptyGrid (w, h) = Grid rows (w,h)
+emptyGrid (w, h) = Grid rows (w,h) 0
    where rows = replicate h $ replicate w $ Cell Empty Closed
 
 -- TODO
@@ -52,13 +52,14 @@ update grid (_, _, Nothing, Nothing) = grid
 update grid (row, col, cont, stat)
         | row > fst (size grid) = error "update: Row out of range."
         | col > snd (size grid) = error "update: Column out of range."
-        | otherwise = Grid (rs1 ++ rs' ++ (drop 1 rs2)) (size grid)
+        | otherwise = Grid rows' (size grid) (mines grid)
     where
         cell  = rows grid !! row !! col
         cont' = if isJust cont then fromJust cont else content cell
         stat' = if isJust stat then fromJust stat else status cell
         (rs1, rs2) = splitAt row $ rows grid
         rs' = [head rs2 !!= (col, Cell cont' stat')]
+        rows' = rs1 ++ rs' ++ (drop 1 rs2)
 
 setCell :: Grid -> (Int, Int) -> Content -> Maybe Grid
 setCell grid (row, col) cont
@@ -74,3 +75,14 @@ isLostCell cell = status cell == Open && content cell == Mine
 
 isLost :: Grid -> Bool
 isLost grid = any isLostCell $ concat $ rows grid
+
+nonMines :: Grid -> Int
+nonMines grid = rows * cols - mines grid
+    where (rows, cols) = size grid
+
+isOpen :: Cell -> Bool
+isOpen cell = status cell == Open
+
+isAllOpen :: Grid -> Bool
+isAllOpen grid = length opens == nonMines grid
+    where opens = filter isOpen $ concat $ rows grid
