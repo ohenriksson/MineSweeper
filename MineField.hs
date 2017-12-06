@@ -13,11 +13,7 @@ Portability :  portable | non-portable (<reason>)
 
 module MineField where
 
-{-
-TODO Implement Cell
-Should contain Mine or an integer 0-8
-May be open, closed or flaged
--}
+-- | TODO Commenting
 data Cell = Cell { content :: CellContent, status :: CellStatus }
             deriving (Eq, Show)
 
@@ -31,10 +27,9 @@ data CellStatus = Open | Closed | Flaged
 TODO Implement Arbitrary Cell
 -}
 
-{-
-TODO Implement Board
-Should contain 2 dimensional grid of cells. Make it two lists
--}
+-- | TODO Comment
+data Field = Field { rows :: [[Cell]] }
+             deriving (Eq, Show)
 
 {-
 TODO Implement Arbitrary Board
