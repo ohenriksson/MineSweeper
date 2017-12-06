@@ -12,3 +12,7 @@ Portability :  portable | non-portable (<reason>)
 -}
 
 import Mines
+
+makeEmptyMinefield :: (Int, Int) -> Minefield
+makeEmptyMinefield (w, h) = Minefield rows (w,h)
+    where rows = replicate h $ replicate w $ Cell Empty Closed
