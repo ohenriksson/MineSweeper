@@ -11,13 +11,13 @@ Portability :  portable | non-portable (<reason>)
 <module description starting at first column>
 -}
 
-module MineField where
+module Mines where
 
 -- | TODO Commenting
 data Cell = Cell { content :: CellContent, status :: CellStatus }
             deriving (Eq, Show)
 
-data CellContent = Numeric Integer | Mine 
+data CellContent = Numeric Integer | Mine | Empty
                    deriving (Eq, Show)
 
 data CellStatus = Open | Closed | Flaged
@@ -28,7 +28,7 @@ TODO Implement Arbitrary Cell
 -}
 
 -- | TODO Comment
-data Field = Field { rows :: [[Cell]] }
+data Minefield = Minefield { rows :: [[Cell]], size :: (Int,Int)}
              deriving (Eq, Show)
 
 {-
