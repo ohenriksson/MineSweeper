@@ -32,6 +32,9 @@ emptyGrid :: (Int, Int) -> Grid
 emptyGrid (w, h) = Grid rows (w,h)
    where rows = replicate h $ replicate w $ Cell Empty Closed
 
+-- TODO
+-- makeGrid :: (Int, Int) -> Int -> Grid
+
 -- | For a given list l, and a given tuple (i, v),
 --   replace element i in l with v
 (!!=) :: [a] -> (Int,a) -> [a]
@@ -62,6 +65,12 @@ setCell grid (row, col) cont
         | row > fst (size grid) = Nothing
         | col > snd (size grid) = Nothing
         | status cell == Open   = Nothing
-        | status cell == cont   = Nothing
-        | otherwise = update grid (row, col, Nothing, cont)
+        | content cell == cont  = Nothing
+        | otherwise = Just $ update grid (row, col, Just cont, Nothing)
     where cell  = rows grid !! row !! col
+
+isLostCell :: Cell -> Bool 
+isLostCell cell = status cell == Open && content cell == Mine
+
+isLost :: Grid -> Bool
+isLost grid = any isLostCell $ concat $ rows grid
