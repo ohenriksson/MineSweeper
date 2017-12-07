@@ -40,6 +40,8 @@ data Status = Open | Closed | Flaged
 -- | Representation of a Minefield
 data Grid = Grid { rows :: [[Cell]], size :: (Int,Int), mines :: Int}
             deriving (Eq)
+
+-- | Ascii representation of minefield
 instance Show Grid where
     show grid = 
         "   " ++ concat (bar $snd $size grid)
