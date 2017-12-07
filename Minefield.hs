@@ -27,23 +27,41 @@ instance Show Cell where
     show (Cell  _          Flaged) = "[f]"
     show (Cell  Empty      Open)   = "   "
     show (Cell  Mine       Open)   = "}#{"
-    show (Cell (Numeric n) Open)   = concat [" ", show n ," "]
+    show (Cell (Numeric n) Open)   = " " ++ show n ++ " "
 
 -- | Representation of whether a Mine is in cell or close
 data Content = Numeric Integer | Mine | Empty
-               deriving (Eq, Show)
+               deriving (Eq)
 
 -- | Representation of whether cell is open, closed or flaged by player
 data Status = Open | Closed | Flaged
-              deriving (Eq, Show)
+              deriving (Eq)
 
 -- | Representation of a Minefield
 data Grid = Grid { rows :: [[Cell]], size :: (Int,Int), mines :: Int}
-            deriving (Eq, Show)
+            deriving (Eq)
+instance Show Grid where
+    show grid = 
+        "   " ++ concat (bar $snd $size grid)
+        ++ "\n"
+        ++ concat[fst r 
+        ++ snd r ++ "\n"
+        | r <- bar (fst $size grid) `zip`
+        [concatMap show r | r <- rows grid] ]
+
+-- | Make size strings of increamenting numbers, each string of 3 characters 
+bar :: Int -> [String]
+bar size = 
+    [if n >= 100 then show n
+            else (
+                if n >= 10 then show n
+                else " " ++ show n) ++ " "
+            | n <- [1..size]]
+
 
 -- | Given a size (width, height), create a grid with no mines
 emptyGrid :: (Int, Int) -> Grid
-emptyGrid (w, h) = Grid rows (w,h) 0
+emptyGrid (h, w) = Grid rows (h, w) 0
    where rows = replicate h $ replicate w $ Cell Empty Closed
 
 -- | Test if all non-mines has been open
@@ -59,7 +77,7 @@ isLost grid = any ((==) Open . status) mines
 -- | Given an StdGen, a size, and a number of mines, make a random Minefield
 makeGrid :: StdGen -> (Int, Int) -> Int -> Grid
 makeGrid g (w, h) mines
-    | any ((<) 0) [w,h,mines] = error "makeGrid: Negative numbers forbidden."
+    | any (0 <) [w,h,mines] = error "makeGrid: Negative numbers forbidden."
     | (w*h) <= mines          = error "makeGrid: Too many mines."
     | otherwise = makeGrid' g (emptyGrid (w,h)) mines minePositions
     where minePositions = [(r,c) | r <- [0..(h-1)], c <- [0..(w-1)]]
@@ -88,8 +106,8 @@ update grid (row, col, cont, stat)
     | otherwise = Grid rows' (size grid) (mines grid)
     where
         cell  = rows grid !! row !! col
-        cont' = if isJust cont then fromJust cont else content cell
-        stat' = if isJust stat then fromJust stat else status cell
+        cont' = fromMaybe (content cell) cont
+        stat' = fromMaybe (status cell) stat
         (r, _, rs1, rs2) = pop (rows grid) row
         rows' = rs1 ++ [r !!= (col, Cell cont' stat')] ++ rs2
 
