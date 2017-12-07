@@ -14,6 +14,7 @@ Portability :  portable | non-portable (<reason>)
 module Minefield where
 
 import Data.Maybe
+import System.Random
 
 data Content = Numeric Integer | Mine | Empty
                deriving (Eq, Show)
@@ -32,8 +33,21 @@ emptyGrid :: (Int, Int) -> Grid
 emptyGrid (w, h) = Grid rows (w,h) 0
    where rows = replicate h $ replicate w $ Cell Empty Closed
 
---makeGrid :: (Int, Int) -> Int -> Grid
---makeGrid (w, h) mines
+makeGrid :: StdGen -> (Int, Int) -> Int -> Grid
+makeGrid g (w, h) mines
+    | any ((<) 0) [w,h,mines] = error "makeGrid: Negative numbers forbidden."
+    | (w*h) <= mines          = error "makeGrid: Too many mines."
+    | otherwise = makeGrid' g (emptyGrid (w,h)) mines minePositions
+    where minePositions = [(r,c) | r <- [0..(h-1)], c <- [0..(w-1)]]
+
+makeGrid' :: StdGen -> Grid -> Int -> [(Int,Int)] -> Grid
+makeGrid' _ grid 0 _  = grid
+makeGrid' _ grid _ [] = error "makeGrid: positionList too short."
+makeGrid' g grid m mp = update grid' (row, col, Just Mine, Nothing)
+    where
+        (i, g') = randomR (0, length mp) g
+        ((row,col), mp', _, _) = pop i mp
+        grid' = makeGrid' g' grid (m-1) mp'
 
 inRange :: (Eq a, Ord a) => a -> a -> a -> Bool
 inRange a b c = a <= b && b < c
@@ -42,9 +56,15 @@ inRange a b c = a <= b && b < c
 --   replace element i in l with v
 (!!=) :: [a] -> (Int,a) -> [a]
 (!!=) l (i, r)
-    | null l                     = error "(!!): list is empty"
-    | not$inRange 0 i (length l) = error "(!!): index out of range"
-    | otherwise                  = l1 ++ [r] ++ drop 1 l2
+    | null l                     = error "(!!): List is empty."
+    | not$inRange 0 i (length l) = error "(!!): Index out of range."
+    | otherwise                  = l1 ++ [r] ++ l2
+    where (_, _, l1, l2) = pop i l
+
+pop :: Int -> [a] -> (a, [a], [a], [a])
+pop i l 
+    | not$inRange 0 i (length l - 1) = error "pop: Index out of range."
+    | otherwise = (head l2, l1 ++ (drop 1 l2), l1, drop 1 l2)
     where (l1, l2) = splitAt i l
 
 -- | For a given Grid grid, and a given tuple (row, col, cont, stat),
@@ -59,14 +79,13 @@ update grid (row, col, cont, stat)
         cell  = rows grid !! row !! col
         cont' = if isJust cont then fromJust cont else content cell
         stat' = if isJust stat then fromJust stat else status cell
-        (rs1, rs2) = splitAt row $ rows grid
-        rs' = [head rs2 !!= (col, Cell cont' stat')]
-        rows' = rs1 ++ rs' ++ (drop 1 rs2)
+        (r, _, rs1, rs2) = pop row $ rows grid
+        rows' = rs1 ++ [r !!= (col, Cell cont' stat')] ++ rs2
 
 setCell :: Grid -> (Int, Int) -> Content -> Maybe Grid
 setCell grid (row, col) cont
-        | status cell == Open   = Nothing
-        | content cell == cont  = Nothing
+        | status  cell == Open = Nothing
+        | content cell == cont = Nothing
         | otherwise = Just $ update grid (row, col, Just cont, Nothing)
     where cell  = rows grid !! row !! col
 
