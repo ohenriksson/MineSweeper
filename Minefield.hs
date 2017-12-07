@@ -32,17 +32,19 @@ emptyGrid :: (Int, Int) -> Grid
 emptyGrid (w, h) = Grid rows (w,h) 0
    where rows = replicate h $ replicate w $ Cell Empty Closed
 
--- TODO
--- makeGrid :: (Int, Int) -> Int -> Grid
+--makeGrid :: (Int, Int) -> Int -> Grid
+--makeGrid (w, h) mines
+
+inRange :: (Eq a, Ord a) => a -> a -> a -> Bool
+inRange a b c = a <= b && b < c
 
 -- | For a given list l, and a given tuple (i, v),
 --   replace element i in l with v
 (!!=) :: [a] -> (Int,a) -> [a]
 (!!=) l (i, r)
-        | null l        = error "(!!): list is empty"
-        | i < 0         = error "(!!): index is negative"
-        | i >= length l = error "(!!): index out of range"
-        | otherwise     = l1 ++ [r] ++ drop 1 l2
+    | null l                     = error "(!!): list is empty"
+    | not$inRange 0 i (length l) = error "(!!): index out of range"
+    | otherwise                  = l1 ++ [r] ++ drop 1 l2
     where (l1, l2) = splitAt i l
 
 -- | For a given Grid grid, and a given tuple (row, col, cont, stat),
@@ -50,9 +52,9 @@ emptyGrid (w, h) = Grid rows (w,h) 0
 update :: Grid -> (Int, Int, Maybe Content, Maybe Status) -> Grid
 update grid (_, _, Nothing, Nothing) = grid
 update grid (row, col, cont, stat)
-        | row > fst (size grid) = error "update: Row out of range."
-        | col > snd (size grid) = error "update: Column out of range."
-        | otherwise = Grid rows' (size grid) (mines grid)
+    | not$inRange 0 row $fst(size grid) = error "update: Row out of range."
+    | not$inRange 0 col $snd(size grid) = error "update: Column out of range."
+    | otherwise = Grid rows' (size grid) (mines grid)
     where
         cell  = rows grid !! row !! col
         cont' = if isJust cont then fromJust cont else content cell
@@ -63,8 +65,6 @@ update grid (row, col, cont, stat)
 
 setCell :: Grid -> (Int, Int) -> Content -> Maybe Grid
 setCell grid (row, col) cont
-        | row > fst (size grid) = Nothing
-        | col > snd (size grid) = Nothing
         | status cell == Open   = Nothing
         | content cell == cont  = Nothing
         | otherwise = Just $ update grid (row, col, Just cont, Nothing)
