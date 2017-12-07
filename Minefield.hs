@@ -110,7 +110,9 @@ update grid (row, col, cont, stat)
 
 setCell :: Grid -> (Int, Int) -> Content -> Maybe Grid
 setCell grid (row, col) cont
-        | status  cell == Open = Nothing
-        | content cell == cont = Nothing
-        | otherwise = Just $ update grid (row, col, Just cont, Nothing)
-    where cell  = rows grid !! row !! col
+    | status  cell == Open = Nothing
+    | content cell == cont = Nothing
+    | otherwise = Just $ update grid (row, col, Just cont, Nothing)
+    where cell = rows grid !! row !! col
+
+
