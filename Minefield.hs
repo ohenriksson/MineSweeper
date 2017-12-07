@@ -93,11 +93,6 @@ makeGrid' g grid m mp = update grid' (row, col, Just Mine, Nothing)
         ((row,col), mp', _, _) = pop mp i
         grid' = makeGrid' g' grid (m-1) mp'
 
-printGrid :: Grid -> IO ()
-printGrid grid = do
-    let (w, h) = size grid
-    putStrLn "Heyy"
-
 -- | For a given Grid grid, and a given tuple (row, col, cont, stat),
 --   update cell (row, col) with non-nothing cont and stat
 update :: Grid -> (Int, Int, Maybe Content, Maybe Status) -> Grid
