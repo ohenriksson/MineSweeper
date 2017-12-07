@@ -1,6 +1,31 @@
 import Minefield
 import Test.QuickCheck
 
+instance Arbitrary Cell where
+    arbitrary = do 
+        content <- arbitrary
+        return (Cell content Open)
+
+instance Arbitrary Content where
+    arbitrary = frequency [
+        (1, return Mine)
+        , (9, return Empty)
+        ]
+
+-- | an instance for generating Arbitrary Sudokus
+instance Arbitrary Grid where
+    arbitrary = do
+        height <- choose (1,40)
+        width <- choose (1,40)
+        rows <- vectorOf height (vectorOf width arbitrary)
+        let mines = length (filter ((Mine ==) . content) (concat rows))
+        return (Grid rows (height, width) mines)
+
+aGrid :: Gen Grid
+aGrid = do
+    grid <- arbitrary
+    return (grid)
+
 prop_emptyGrid_allClosedEmpty :: (Int,Int) -> Property
 prop_emptyGrid_allClosedEmpty (w,h) =
     w >= 0 && h >= 0 ==>
