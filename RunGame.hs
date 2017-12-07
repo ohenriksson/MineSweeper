@@ -15,21 +15,23 @@ module RunGame where
 
 import Minefield
 
-newtype Interface = Interface
+data Interface = Interface
   { iEmptyGrid  :: (Int,Int) -> Grid
   , iIsLost     :: Grid -> Bool
   , iIsAllOpen  :: Grid -> Bool
   }
 
 -- | start gameLoop on user input
--- runGame :: Interface -> IO ()
--- TODO
-
+runGame :: Interface -> IO ()
+runGame iFace = do
+  putStrLn "---Minesweeper---"
+  gameLoop iFace
 
 -- | game loop, let user set up a new game and playMatch or exit.
--- gameLoop :: Interface -> IO ()
--- TODO
-
+gameLoop :: Interface -> IO ()
+gameLoop iFace = do
+  putStrLn "match 1:"
+  -- TODO
 
 -- | play one match, interact with user,
 -- playMatch :: Minefield -> IO()
