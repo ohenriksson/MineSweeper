@@ -24,7 +24,7 @@ data Cell = Cell { content :: Content, status :: Status }
 -- | Ascii representation of cell, always 3 characters
 instance Show Cell where
     show (Cell  _          Closed) = "[ ]"
-    show (Cell  _          Flaged) = "[f]"
+    show (Cell  _          Flagged) = "[f]"
     show (Cell  Empty      Open)   = "   "
     show (Cell  Mine       Open)   = "}#{"
     show (Cell (Numeric n) Open)   = " " ++ show n ++ " "
@@ -34,7 +34,7 @@ data Content = Numeric Integer | Mine | Empty
                deriving (Eq)
 
 -- | Representation of whether cell is open, closed or flaged by player
-data Status = Open | Closed | Flaged
+data Status = Open | Closed | Flagged
               deriving (Eq)
 
 -- | Representation of a Minefield
@@ -114,5 +114,16 @@ setCell grid (row, col) cont
     | content cell == cont = Nothing
     | otherwise = Just $ update grid (row, col, Just cont, Nothing)
     where cell = rows grid !! row !! col
+
+getSurrounding :: Grid -> (Int,Int) -> [Cell]
+getSurrounding grid (row,col) = concatMap (get3 col) rs
+    where rs = get3 row (rows grid)
+
+get3 :: Int -> [a] -> [a]
+get3 i = drop (i - 1) . take (i + 2)
+
+
+--setGridNumerics :: Grid -> Grid
+--setGridNumerics = 
 
 
