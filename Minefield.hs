@@ -15,6 +15,7 @@ module Minefield where
 
 import Data.Maybe
 import System.Random
+import ListFunctions
 
 data Content = Numeric Integer | Mine | Empty
                deriving (Eq, Show)
@@ -27,7 +28,6 @@ data Cell = Cell { content :: Content, status :: Status }
 
 data Grid = Grid { rows :: [[Cell]], size :: (Int,Int), mines :: Int}
             deriving (Eq, Show)
-
 
 emptyGrid :: (Int, Int) -> Grid
 emptyGrid (w, h) = Grid rows (w,h) 0
@@ -48,24 +48,6 @@ makeGrid' g grid m mp = update grid' (row, col, Just Mine, Nothing)
         (i, g') = randomR (0, length mp) g
         ((row,col), mp', _, _) = pop i mp
         grid' = makeGrid' g' grid (m-1) mp'
-
-inRange :: (Eq a, Ord a) => a -> a -> a -> Bool
-inRange a b c = a <= b && b < c
-
--- | For a given list l, and a given tuple (i, v),
---   replace element i in l with v
-(!!=) :: [a] -> (Int,a) -> [a]
-(!!=) l (i, r)
-    | null l                     = error "(!!): List is empty."
-    | not$inRange 0 i (length l) = error "(!!): Index out of range."
-    | otherwise                  = l1 ++ [r] ++ l2
-    where (_, _, l1, l2) = pop i l
-
-pop :: Int -> [a] -> (a, [a], [a], [a])
-pop i l 
-    | not$inRange 0 i (length l - 1) = error "pop: Index out of range."
-    | otherwise = (head l2, l1 ++ (drop 1 l2), l1, drop 1 l2)
-    where (l1, l2) = splitAt i l
 
 -- | For a given Grid grid, and a given tuple (row, col, cont, stat),
 --   update cell (row, col) with non-nothing cont and stat
