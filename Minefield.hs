@@ -17,22 +17,38 @@ import Data.Maybe
 import System.Random
 import ListFunctions
 
-data Content = Numeric Integer | Mine | Empty
-               deriving (Eq, Show)
-
-data Status = Open | Closed | Flaged
-              deriving (Eq, Show)
-
+-- | Representation of a coordinate in Minefield
 data Cell = Cell { content :: Content, status :: Status }
             deriving (Eq, Show)
 
+-- | Representation of whether a Mine is in cell or close
+data Content = Numeric Integer | Mine | Empty
+               deriving (Eq, Show)
+
+-- | Representation of whether cell is open, closed or flaged by player
+data Status = Open | Closed | Flaged
+              deriving (Eq, Show)
+
+-- | Representation of a Minefield
 data Grid = Grid { rows :: [[Cell]], size :: (Int,Int), mines :: Int}
             deriving (Eq, Show)
 
+-- | Given a size (width, height), create a grid with no mines
 emptyGrid :: (Int, Int) -> Grid
 emptyGrid (w, h) = Grid rows (w,h) 0
    where rows = replicate h $ replicate w $ Cell Empty Closed
 
+-- | Test if all non-mines has been open
+isAllOpen :: Grid -> Bool
+isAllOpen grid = all ((==) Open . status) nonMines
+    where nonMines = filter ((/=) Mine . content) $ concat $ rows grid
+
+-- | Test if any mine has been open
+isLost :: Grid -> Bool
+isLost grid = any ((==) Open . status) mines
+    where mines = filter ((==) Mine . content) $ concat $ rows grid
+
+-- | Given an StdGen, a size, and a number of mines, make a random Minefield
 makeGrid :: StdGen -> (Int, Int) -> Int -> Grid
 makeGrid g (w, h) mines
     | any ((<) 0) [w,h,mines] = error "makeGrid: Negative numbers forbidden."
@@ -70,20 +86,3 @@ setCell grid (row, col) cont
         | content cell == cont = Nothing
         | otherwise = Just $ update grid (row, col, Just cont, Nothing)
     where cell  = rows grid !! row !! col
-
-isLostCell :: Cell -> Bool 
-isLostCell cell = status cell == Open && content cell == Mine
-
-isLost :: Grid -> Bool
-isLost grid = any isLostCell $ concat $ rows grid
-
-nonMines :: Grid -> Int
-nonMines grid = rows * cols - mines grid
-    where (rows, cols) = size grid
-
-isOpen :: Cell -> Bool
-isOpen cell = status cell == Open
-
-isAllOpen :: Grid -> Bool
-isAllOpen grid = length opens == nonMines grid
-    where opens = filter isOpen $ concat $ rows grid
