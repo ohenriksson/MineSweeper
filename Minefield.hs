@@ -46,7 +46,7 @@ makeGrid' _ grid _ [] = error "makeGrid: positionList too short."
 makeGrid' g grid m mp = update grid' (row, col, Just Mine, Nothing)
     where
         (i, g') = randomR (0, length mp) g
-        ((row,col), mp', _, _) = pop i mp
+        ((row,col), mp', _, _) = pop mp i
         grid' = makeGrid' g' grid (m-1) mp'
 
 -- | For a given Grid grid, and a given tuple (row, col, cont, stat),
@@ -61,7 +61,7 @@ update grid (row, col, cont, stat)
         cell  = rows grid !! row !! col
         cont' = if isJust cont then fromJust cont else content cell
         stat' = if isJust stat then fromJust stat else status cell
-        (r, _, rs1, rs2) = pop row $ rows grid
+        (r, _, rs1, rs2) = pop (rows grid) row
         rows' = rs1 ++ [r !!= (col, Cell cont' stat')] ++ rs2
 
 setCell :: Grid -> (Int, Int) -> Content -> Maybe Grid
