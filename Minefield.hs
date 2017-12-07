@@ -19,7 +19,15 @@ import ListFunctions
 
 -- | Representation of a coordinate in Minefield
 data Cell = Cell { content :: Content, status :: Status }
-            deriving (Eq, Show)
+            deriving (Eq)
+
+-- | Ascii representation of cell, always 3 characters
+instance Show Cell where
+    show (Cell  _          Closed) = "[ ]"
+    show (Cell  _          Flaged) = "[f]"
+    show (Cell  Empty      Open)   = "   "
+    show (Cell  Mine       Open)   = "}#{"
+    show (Cell (Numeric n) Open)   = concat [" ", show n ," "]
 
 -- | Representation of whether a Mine is in cell or close
 data Content = Numeric Integer | Mine | Empty
@@ -64,6 +72,11 @@ makeGrid' g grid m mp = update grid' (row, col, Just Mine, Nothing)
         (i, g') = randomR (0, length mp) g
         ((row,col), mp', _, _) = pop mp i
         grid' = makeGrid' g' grid (m-1) mp'
+
+printGrid :: Grid -> IO ()
+printGrid grid = do
+    let (w, h) = size grid
+    putStrLn "Heyy"
 
 -- | For a given Grid grid, and a given tuple (row, col, cont, stat),
 --   update cell (row, col) with non-nothing cont and stat
