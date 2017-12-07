@@ -13,7 +13,13 @@ Portability :  portable | non-portable (<reason>)
 
 module RunGame where
 
-import MineSweeperEngine
+import Minefield
+
+newtype Interface = Interface
+  { iEmptyGrid  :: (Int,Int) -> Grid
+  , iIsLost     :: Grid -> Bool
+  , iIsAllOpen  :: Grid -> Bool
+  }
 
 -- | start gameLoop on user input
 -- runGame :: Interface -> IO ()
