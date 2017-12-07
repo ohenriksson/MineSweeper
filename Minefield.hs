@@ -116,11 +116,11 @@ setCell grid (row, col) cont
     where cell = rows grid !! row !! col
 
 getSurrounding :: Grid -> (Int,Int) -> [Cell]
-getSurrounding grid (row,col) = concatMap (get3 col) rs
-    where rs = get3 row (rows grid)
+getSurrounding grid (row,col) = concatMap (take3 col) rs
+    where rs = take3 row (rows grid)
 
-get3 :: Int -> [a] -> [a]
-get3 i = drop (i - 1) . take (i + 2)
+take3 :: Int -> [a] -> [a]
+take3 i = drop (i - 1) . take (i + 2)
 
 
 --setGridNumerics :: Grid -> Grid

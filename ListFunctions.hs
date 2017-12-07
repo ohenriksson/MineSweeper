@@ -22,3 +22,6 @@ pop l i
     | not$inRange 0 i (length l) = error "pop: Index out of range."
     | otherwise = (head l2, l1 ++ drop 1 l2, l1, drop 1 l2)
     where (l1, l2) = splitAt i l
+
+take3 :: Int -> [a] -> [a]
+take3 i = drop (i - 1) . take (i + 2)
