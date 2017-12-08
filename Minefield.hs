@@ -43,27 +43,27 @@ data Grid = Grid { rows :: [[Cell]], size :: (Int,Int), mines :: Int}
 
 -- | Ascii representation of minefield
 instance Show Grid where
-    show grid = showTop grid ++ showRows grid
+    show grid = showGridTop grid ++ showGridRows grid
 
 -- | Make size strings of increamenting numbers, each string of 3 characters 
-showBar :: Int -> [String]
-showBar size = map showTick [1..size]
+showGridBar :: Int -> [String]
+showGridBar size = map showGridTick [1..size]
 
-showTick :: Int -> String 
-showTick n 
+showGridTick :: Int -> String 
+showGridTick n 
     | n < 10    = " " ++ show n ++ " "
     | n < 100   = " " ++ show n
     | otherwise = show n
 
-showRow :: Int -> [Cell] -> String
-showRow n cells = showTick n ++ concatMap show cells ++ "\n"
+showGridRow :: Int -> [Cell] -> String
+showGridRow n cells = showGridTick n ++ concatMap show cells ++ "\n"
 
-showRows :: Grid -> String
-showRows grid = (concatMap (uncurry showRow) . zip [1..n] . rows) grid 
+showGridRows :: Grid -> String
+showGridRows grid = (concatMap (uncurry showGridRow) . zip [1..n] . rows) grid 
     where (n, _) = size grid
 
-showTop :: Grid -> String
-showTop grid =  "   " ++ (concat . showBar . snd . size) grid ++ "\n"
+showGridTop :: Grid -> String
+showGridTop grid =  "   " ++ (concat . showGridBar . snd . size) grid ++ "\n"
 
 -- | Given a size (width, height), create a grid with no mines
 emptyGrid :: (Int, Int) -> Grid
