@@ -78,20 +78,33 @@ isLost grid = any ((==) Open . status) mines
 
 -- | Given an StdGen, a size, and a number of mines, make a random Minefield
 makeGrid :: StdGen -> (Int, Int) -> Int -> Grid
-makeGrid g (w, h) mines
-    | any (0 <) [w,h,mines] = error "makeGrid: Negative numbers forbidden."
+makeGrid g (h, w) mines
+    | any (0 >) [w,h,mines] = error "makeGrid: Negative numbers forbidden."
     | (w*h) <= mines          = error "makeGrid: Too many mines."
-    | otherwise = makeGrid' g (emptyGrid (w,h)) mines minePositions
-    where minePositions = [(r,c) | r <- [0..(h-1)], c <- [0..(w-1)]]
+    | otherwise = makeGridMines g (emptyGrid (h,w)) mines minePositions
+    where minePositions = cartesian [0..(h-1)] [0..(w-1)]
 
-makeGrid' :: StdGen -> Grid -> Int -> [(Int,Int)] -> Grid
-makeGrid' _ grid 0 _  = grid
-makeGrid' _ grid _ [] = error "makeGrid: positionList too short."
-makeGrid' g grid m mp = update grid' (row, col, Just Mine, Nothing)
+makeGridMines :: StdGen -> Grid -> Int -> [(Int,Int)] -> Grid
+makeGridMines _ grid 0 _  = grid
+makeGridMines _ grid _ [] = error "makeGrid: positionList too short."
+makeGridMines g grid m mp = update grid' (row, col, Just Mine, Nothing)
     where
-        (i, g') = randomR (0, length mp) g
-        ((row,col), mp', _, _) = pop mp i
-        grid' = makeGrid' g' grid (m-1) mp'
+        (i, g') = randomR (0, length mp-1) g
+        ((row,col), mp', _, _) = pop i mp
+        grid' = makeGridMines g' grid (m-1) mp'
+
+makeGridNumerics :: Grid -> Grid
+makeGridNumerics grid = foldr makeGridNumeric grid nonMines 
+    where
+        (h,w) = size grid
+        cells = cartesian [0..(h-1)] [0..(w-1)] `zip` concat (rows grid) 
+        nonMines = map fst $filter ((/=) Mine . content . snd) cells
+
+makeGridNumeric :: (Int, Int) -> Grid -> Grid
+makeGridNumeric (r,c) grid 
+    | mines == 0 = grid
+    | otherwise  = update grid (r, c, Just (Numeric (fromIntegral mines)), Nothing)
+    where mines = length $filter ((==) Mine . content) $getSurrounding (r,c) grid
 
 -- | For a given Grid grid, and a given tuple (row, col, cont, stat),
 --   update cell (row, col) with non-nothing cont and stat
@@ -105,25 +118,19 @@ update grid (row, col, cont, stat)
         cell  = rows grid !! row !! col
         cont' = fromMaybe (content cell) cont
         stat' = fromMaybe (status cell) stat
-        (r, _, rs1, rs2) = pop (rows grid) row
+        (r, _, rs1, rs2) = pop row (rows grid)
         rows' = rs1 ++ [r !!= (col, Cell cont' stat')] ++ rs2
 
-setCell :: Grid -> (Int, Int) -> Content -> Maybe Grid
-setCell grid (row, col) cont
+setCell :: Grid -> (Int, Int) -> Status -> Maybe Grid
+setCell grid (row, col) stat
     | status  cell == Open = Nothing
-    | content cell == cont = Nothing
-    | otherwise = Just $ update grid (row, col, Just cont, Nothing)
+    | status  cell == stat = Nothing
+    | otherwise = Just $ update grid (row, col, Nothing, Just stat)
     where cell = rows grid !! row !! col
 
-getSurrounding :: Grid -> (Int,Int) -> [Cell]
-getSurrounding grid (row,col) = concatMap (take3 col) rs
-    where rs = take3 row (rows grid)
-
-take3 :: Int -> [a] -> [a]
-take3 i = drop (i - 1) . take (i + 2)
+getSurrounding :: (Int,Int) -> Grid -> [Cell]
+getSurrounding (row,col) = concatMap (take3 col) . take3 row . rows
 
 
---setGridNumerics :: Grid -> Grid
---setGridNumerics = 
 
 
