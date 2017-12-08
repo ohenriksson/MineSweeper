@@ -125,9 +125,18 @@ update (row, col) (cont, stat) grid
         (r, _, rs1, rs2) = pop row (rows grid)
         rows' = rs1 ++ [r !!= (col, Cell cont' stat')] ++ rs2
 
-setCell :: Grid -> (Int, Int) -> Status -> Maybe Grid
-setCell grid (row, col) stat
+setCellStatus :: Status -> (Int, Int) -> Grid -> Maybe Grid
+setCellStatus stat (row, col) grid
     | status  cell == Open = Nothing
     | status  cell == stat = Nothing
     | otherwise = Just $ update (row, col) (Nothing, Just stat) grid
     where cell = rows grid !! row !! col
+
+openCell :: (Int, Int) -> Grid -> Maybe Grid
+openCell =  setCellStatus Open
+
+flagCell :: (Int, Int) -> Grid -> Maybe Grid
+flagCell =  setCellStatus Flagged
+
+unflagCell :: (Int, Int) -> Grid -> Maybe Grid
+unflagCell =  setCellStatus Closed
