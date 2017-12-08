@@ -1,5 +1,7 @@
 module ListFunctions where
 
+import System.Random
+
 -- | For a given list l, and a given tuple (i, v),
 --   replace element i in l with v
 (!!=) :: [a] -> (Int,a) -> [a]
@@ -15,12 +17,15 @@ cartesian xs ys = [(x,y) | x <- xs, y <- ys]
 
 -- | Count occurances of given element in given list
 count :: (Eq a) => a -> [a] -> Int
-count x l = length $filter (x ==) l
+count x = length . filter (x ==)
 
 -- | For three given elements, return True if second element
 --   is equal to or larger than first, but small than third
 inRange :: (Eq a, Ord a) => a -> a -> a -> Bool
 inRange a b c = a <= b && b < c
+
+nop :: a -> a
+nop a = a
 
 -- | For a given list l, and a given index i, remove element i from l
 --   and return tuple with <element i>, <new list>, <elements before i>,
@@ -33,3 +38,12 @@ pop i l
 
 take3 :: Int -> [a] -> [a]
 take3 i = drop (i - 1) . take (i + 2)
+
+-- | Take n random elements from a list.
+takeRandom :: StdGen -> Int -> [a] -> [a]
+takeRandom _ 0 _  = []
+takeRandom _ _ [] = error "takeRandom: Not enough elements."
+takeRandom g n l  = x:takeRandom g' (n-1) l'
+    where
+        (i, g') = randomR (0, length l-1) g
+        (x, l', _, _) = pop i l

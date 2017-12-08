@@ -64,7 +64,7 @@ bar size =
 -- | Given a size (width, height), create a grid with no mines
 emptyGrid :: (Int, Int) -> Grid
 emptyGrid (h, w) = Grid rows (h, w) 0
-   where rows = replicate h $ replicate w $ Cell Empty Closed
+   where rows = replicate h $ replicate w $ Cell Empty Open
 
 -- | Test if all non-mines has been open
 isAllOpen :: Grid -> Bool
@@ -78,20 +78,17 @@ isLost grid = any ((==) Open . status) mines
 
 -- | Given an StdGen, a size, and a number of mines, make a random Minefield
 makeGrid :: StdGen -> (Int, Int) -> Int -> Grid
-makeGrid g (h, w) mines
-    | any (0 >) [w,h,mines] = error "makeGrid: Negative numbers forbidden."
-    | (w*h) <= mines          = error "makeGrid: Too many mines."
-    | otherwise = makeGridMines g (emptyGrid (h,w)) mines minePositions
-    where minePositions = cartesian [0..(h-1)] [0..(w-1)]
+makeGrid g (h, w) n
+    | any (0 >) [w,h,n] = error "makeGrid: Negative numbers forbidden."
+    | (w*h) <= n        = error "makeGrid: Too many mines."
+    | otherwise = makeGridNumerics
+                  $makeGridMines mines (emptyGrid (h,w))
+    where mines = takeRandom g n $cartesian [0..(h-1)] [0..(w-1)]
 
-makeGridMines :: StdGen -> Grid -> Int -> [(Int,Int)] -> Grid
-makeGridMines _ grid 0 _  = grid
-makeGridMines _ grid _ [] = error "makeGrid: positionList too short."
-makeGridMines g grid m mp = update grid' (row, col, Just Mine, Nothing)
-    where
-        (i, g') = randomR (0, length mp-1) g
-        ((row,col), mp', _, _) = pop i mp
-        grid' = makeGridMines g' grid (m-1) mp'
+makeGridMines :: [(Int,Int)] -> Grid -> Grid
+makeGridMines [] = nop
+makeGridMines mp = update (row, col) (Just Mine, Nothing) . makeGridMines mp' 
+    where ((row,col), mp', _, _) = pop 0 mp
 
 makeGridNumerics :: Grid -> Grid
 makeGridNumerics grid = foldr makeGridNumeric grid nonMines 
@@ -103,16 +100,16 @@ makeGridNumerics grid = foldr makeGridNumeric grid nonMines
 makeGridNumeric :: (Int, Int) -> Grid -> Grid
 makeGridNumeric (r,c) grid 
     | mines == 0 = grid
-    | otherwise  = update grid (r, c, Just $Numeric mines, Nothing)
+    | otherwise  = update (r, c) (Just $Numeric mines, Nothing) grid
     where
         surrondingContent = map content $getSurrounding (r,c) grid
         mines = fromIntegral $count Mine surrondingContent
 
 -- | For a given Grid grid, and a given tuple (row, col, cont, stat),
 --   update cell (row, col) with non-nothing cont and stat
-update :: Grid -> (Int, Int, Maybe Content, Maybe Status) -> Grid
-update grid (_, _, Nothing, Nothing) = grid
-update grid (row, col, cont, stat)
+update :: (Int, Int) -> (Maybe Content, Maybe Status) -> Grid -> Grid
+update _ (Nothing, Nothing) grid = grid
+update (row, col) (cont, stat) grid
     | not$inRange 0 row $fst(size grid) = error "update: Row out of range."
     | not$inRange 0 col $snd(size grid) = error "update: Column out of range."
     | otherwise = Grid rows' (size grid) (mines grid)
@@ -127,7 +124,7 @@ setCell :: Grid -> (Int, Int) -> Status -> Maybe Grid
 setCell grid (row, col) stat
     | status  cell == Open = Nothing
     | status  cell == stat = Nothing
-    | otherwise = Just $ update grid (row, col, Nothing, Just stat)
+    | otherwise = Just $ update (row, col) (Nothing, Just stat) grid
     where cell = rows grid !! row !! col
 
 getSurrounding :: (Int,Int) -> Grid -> [Cell]
