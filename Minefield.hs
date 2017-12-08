@@ -103,8 +103,10 @@ makeGridNumerics grid = foldr makeGridNumeric grid nonMines
 makeGridNumeric :: (Int, Int) -> Grid -> Grid
 makeGridNumeric (r,c) grid 
     | mines == 0 = grid
-    | otherwise  = update grid (r, c, Just (Numeric (fromIntegral mines)), Nothing)
-    where mines = length $filter ((==) Mine . content) $getSurrounding (r,c) grid
+    | otherwise  = update grid (r, c, Just $Numeric mines, Nothing)
+    where
+        surrondingContent = map content $getSurrounding (r,c) grid
+        mines = fromIntegral $count Mine surrondingContent
 
 -- | For a given Grid grid, and a given tuple (row, col, cont, stat),
 --   update cell (row, col) with non-nothing cont and stat
