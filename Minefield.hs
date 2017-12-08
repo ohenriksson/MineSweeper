@@ -66,15 +66,20 @@ emptyGrid :: (Int, Int) -> Grid
 emptyGrid (h, w) = Grid rows (h, w) 0
    where rows = replicate h $ replicate w $ Cell Empty Open
 
+getCells :: Grid -> [Cell] 
+getCells = concat . rows
+
+-- | Given coordinates p and a grid, return surrounding cell incl cell on p
+getSurrounding :: (Int,Int) -> Grid -> [Cell]
+getSurrounding (row,col) = concatMap (take3 col) . take3 row . rows
+
 -- | Test if all non-mines has been open
 isAllOpen :: Grid -> Bool
-isAllOpen grid = all ((==) Open . status) nonMines
-    where nonMines = filter ((/=) Mine . content) $ concat $ rows grid
+isAllOpen = all ((==) Open . status) . filter ((/=) Mine . content) . getCells
 
 -- | Test if any mine has been open
 isLost :: Grid -> Bool
-isLost grid = any ((==) Open . status) mines
-    where mines = filter ((==) Mine . content) $ concat $ rows grid
+isLost = any ((==) Open . status) . filter ((==) Mine . content) . getCells
 
 -- | Given an StdGen, a size, and a number of mines, make a random Minefield
 makeGrid :: StdGen -> (Int, Int) -> Int -> Grid
@@ -94,7 +99,7 @@ makeGridNumerics :: Grid -> Grid
 makeGridNumerics grid = foldr makeGridNumeric grid nonMines 
     where
         (h,w) = size grid
-        cells = cartesian [0..(h-1)] [0..(w-1)] `zip` concat (rows grid) 
+        cells = cartesian [0..(h-1)] [0..(w-1)] `zip` getCells grid 
         nonMines = map fst $filter ((/=) Mine . content . snd) cells
 
 makeGridNumeric :: (Int, Int) -> Grid -> Grid
@@ -126,10 +131,3 @@ setCell grid (row, col) stat
     | status  cell == stat = Nothing
     | otherwise = Just $ update (row, col) (Nothing, Just stat) grid
     where cell = rows grid !! row !! col
-
-getSurrounding :: (Int,Int) -> Grid -> [Cell]
-getSurrounding (row,col) = concatMap (take3 col) . take3 row . rows
-
-
-
-
