@@ -43,28 +43,32 @@ data Grid = Grid { rows :: [[Cell]], size :: (Int,Int), mines :: Int}
 
 -- | Ascii representation of minefield
 instance Show Grid where
-    show grid = 
-        "   " ++ concat (bar $snd $size grid)
-        ++ "\n"
-        ++ concat[fst r 
-        ++ snd r ++ "\n"
-        | r <- bar (fst $size grid) `zip`
-        [concatMap show r | r <- rows grid] ]
+    show grid = showTop grid ++ showRows grid
 
 -- | Make size strings of increamenting numbers, each string of 3 characters 
-bar :: Int -> [String]
-bar size = 
-    [if n >= 100 then show n
-            else (
-                if n >= 10 then show n
-                else " " ++ show n) ++ " "
-            | n <- [1..size]]
+showBar :: Int -> [String]
+showBar size = map showTick [1..size]
 
+showTick :: Int -> String 
+showTick n 
+    | n < 10    = " " ++ show n ++ " "
+    | n < 100   = " " ++ show n
+    | otherwise = show n
+
+showRow :: Int -> [Cell] -> String
+showRow n cells = showTick n ++ concatMap show cells ++ "\n"
+
+showRows :: Grid -> String
+showRows grid = (concatMap (uncurry showRow) . zip [1..n] . rows) grid 
+    where (n, _) = size grid
+
+showTop :: Grid -> String
+showTop grid =  "   " ++ (concat . showBar . snd . size) grid ++ "\n"
 
 -- | Given a size (width, height), create a grid with no mines
 emptyGrid :: (Int, Int) -> Grid
 emptyGrid (h, w) = Grid rows (h, w) 0
-   where rows = replicate h $ replicate w $ Cell Empty Open
+   where rows = replicate h $ replicate w $ Cell Empty Closed
 
 getCells :: Grid -> [Cell] 
 getCells = concat . rows
