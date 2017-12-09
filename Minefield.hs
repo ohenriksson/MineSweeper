@@ -70,6 +70,9 @@ emptyGrid :: (Int, Int) -> Grid
 emptyGrid (h, w) = Grid rows (h, w)
    where rows = replicate h $ replicate w $ Cell Empty Open
 
+flagCell :: (Int, Int) -> Grid -> Maybe Grid
+flagCell = updateStatus Flagged
+
 -- | Given a coordinate and a grid, return content and status of cell
 getCell :: (Int,Int) -> Grid -> (Content,Status)
 getCell (r,c) grid = (content cell, status cell) 
@@ -129,6 +132,17 @@ makeGridNumeric (r,c) grid
         surrondingContent = map content $getSurrounding (r,c) grid
         mines = fromIntegral $count Mine surrondingContent
 
+openCell :: (Int, Int) -> Grid -> Maybe Grid
+openCell = updateStatus Open
+
+openCells :: [(Int,Int)] -> Grid -> Maybe Grid
+openCells l grid 
+    | null l = Just grid
+    | otherwise = maybe Nothing (openCells (drop 1 l)) grid'
+    where grid' = openCell (head l) grid
+
+unflagCell :: (Int, Int) -> Grid -> Maybe Grid
+unflagCell = updateStatus Closed
 
 updateContent :: Content -> (Int, Int) -> Grid -> Grid
 updateContent co' (r,c) grid =
@@ -141,18 +155,3 @@ updateStatus st' (r,c) grid
     | st == st'   = Nothing
     | otherwise   = Just $Grid (rows grid !!!= (r, c, Cell co st')) $size grid
     where (co,st) = getCell (r,c) grid
-
-openCell :: (Int, Int) -> Grid -> Maybe Grid
-openCell = updateStatus Open
-
-openCells :: [(Int,Int)] -> Grid -> Maybe Grid
-openCells l grid 
-    | null l = Just grid
-    | otherwise = maybe Nothing (openCells (drop 1 l)) grid'
-    where grid' = openCell (head l) grid
-
-flagCell :: (Int, Int) -> Grid -> Maybe Grid
-flagCell = updateStatus Flagged
-
-unflagCell :: (Int, Int) -> Grid -> Maybe Grid
-unflagCell = updateStatus Closed
