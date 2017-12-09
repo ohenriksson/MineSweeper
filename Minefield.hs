@@ -38,7 +38,7 @@ data Status = Open | Closed | Flagged
               deriving (Eq)
 
 -- | Representation of a Minefield
-data Grid = Grid { rows :: [[Cell]], size :: (Int,Int), mines :: Int}
+data Grid = Grid { rows :: [[Cell]], size :: (Int,Int)}
             deriving (Eq)
 
 -- | Ascii representation of minefield
@@ -68,8 +68,9 @@ showGridTop grid =  "   " ++ (concat . showGridBar . snd . size) grid ++ "\n"
 -- | Given a size (width, height), create a grid with no mines
 emptyGrid :: (Int, Int) -> Grid
 emptyGrid (h, w) = Grid rows (h, w) 0
-   where rows = replicate h $ replicate w $ Cell Empty Closed
+   where rows = replicate h $ replicate w $ Cell Empty Open
 
+-- | Given a Grid, get a list of all Cells
 getCells :: Grid -> [Cell] 
 getCells = concat . rows
 
@@ -118,16 +119,12 @@ makeGridNumeric (r,c) grid
 --   update cell (row, col) with non-nothing cont and stat
 update :: (Int, Int) -> (Maybe Content, Maybe Status) -> Grid -> Grid
 update _ (Nothing, Nothing) grid = grid
-update (row, col) (cont, stat) grid
-    | not$inRange 0 row $fst(size grid) = error "update: Row out of range."
-    | not$inRange 0 col $snd(size grid) = error "update: Column out of range."
-    | otherwise = Grid rows' (size grid) (mines grid)
+update (r, c) (cont, stat) grid = Grid rows' (size grid) (mines grid)
     where
-        cell  = rows grid !! row !! col
+        cell  = rows grid !! r !! c
         cont' = fromMaybe (content cell) cont
         stat' = fromMaybe (status cell) stat
-        (r, _, rs1, rs2) = pop row (rows grid)
-        rows' = rs1 ++ [r !!= (col, Cell cont' stat')] ++ rs2
+        rows' = rows grid !!!= (r,c, Cell cont' stat')
 
 setCellStatus :: Status -> (Int, Int) -> Grid -> Maybe Grid
 setCellStatus stat (row, col) grid

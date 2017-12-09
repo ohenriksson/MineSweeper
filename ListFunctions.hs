@@ -5,11 +5,18 @@ import System.Random
 -- | For a given list l, and a given tuple (i, v),
 --   replace element i in l with v
 (!!=) :: [a] -> (Int,a) -> [a]
-(!!=) l (i, r)
-    | null l                     = error "(!!): List is empty."
-    | not$inRange 0 i (length l) = error "(!!): Index out of range."
-    | otherwise                  = l1 ++ [r] ++ l2
+(!!=) l (i,x)
+    | null l                     = error "(!!=): List is empty."
+    | not$inRange 0 i (length l) = error "(!!=): Index out of range."
+    | otherwise                  = l1 ++ [x] ++ l2
     where (_, _, l1, l2) = pop i l
+
+(!!!=) :: [[a]] -> (Int,Int,a) -> [[a]]
+(!!!=) ll (r,c,x)
+    | null ll                    = error "(!!!=): List is empty."
+    | not$inRange 0 r (length ll) = error "(!!!=): Index out of range."
+    | otherwise = ll !!= (r,l)
+    where l = (ll !! r) !!= (c,x)
 
 -- | For two given lists, return the cartesian product
 cartesian :: [a] -> [b] -> [(a,b)]
@@ -24,6 +31,7 @@ count x = length . filter (x ==)
 inRange :: (Eq a, Ord a) => a -> a -> a -> Bool
 inRange a b c = a <= b && b < c
 
+-- | Return input 
 nop :: a -> a
 nop a = a
 
