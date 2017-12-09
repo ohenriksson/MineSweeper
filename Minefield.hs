@@ -85,11 +85,20 @@ getSurrounding (row,col) = concatMap (take3 col) . take3 row . rows
 
 -- | Test if all non-mines has been open
 isAllOpen :: Grid -> Bool
-isAllOpen = all ((==) Open . status) . filter ((/=) Mine . content) . getCells
+isAllOpen = all isOpen . filter isNotMine . getCells
 
 -- | Test if any mine has been open
 isLost :: Grid -> Bool
-isLost = any ((==) Open . status) . filter ((==) Mine . content) . getCells
+isLost = any isOpen . filter isMine . getCells
+
+isMine :: Cell -> Bool
+isMine = (==) Mine . content
+
+isNotMine :: Cell -> Bool
+isNotMine = not . isMine
+
+isOpen :: Cell -> Bool
+isOpen = (==) Open . status
 
 -- | Given an StdGen, a size, and a number of mines, make a random Minefield
 makeGrid :: StdGen -> (Int, Int) -> Int -> Grid
