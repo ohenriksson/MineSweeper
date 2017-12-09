@@ -70,6 +70,10 @@ emptyGrid :: (Int, Int) -> Grid
 emptyGrid (h, w) = Grid rows (h, w)
    where rows = replicate h $ replicate w $ Cell Empty Open
 
+getCell :: (Int,Int) -> Grid -> (Content,Status)
+getCell (r,c) grid = (content cell, status cell) 
+    where cell = rows grid !! r !! c 
+
 -- | Given a Grid, get a list of all Cells
 getCells :: Grid -> [Cell] 
 getCells = concat . rows
@@ -97,7 +101,7 @@ makeGrid g (h, w) n
 
 makeGridMines :: [(Int,Int)] -> Grid -> Grid
 makeGridMines [] = nop
-makeGridMines mp = update (row, col) (Just Mine, Nothing) . makeGridMines mp' 
+makeGridMines mp = updateContent Mine (row, col) . makeGridMines mp' 
     where ((row,col), mp', _, _) = pop 0 mp
 
 makeGridNumerics :: Grid -> Grid
@@ -110,34 +114,29 @@ makeGridNumerics grid = foldr makeGridNumeric grid nonMines
 makeGridNumeric :: (Int, Int) -> Grid -> Grid
 makeGridNumeric (r,c) grid 
     | mines == 0 = grid
-    | otherwise  = update (r, c) (Just $Numeric mines, Nothing) grid
+    | otherwise  = updateContent (Numeric mines) (r,c) grid
     where
         surrondingContent = map content $getSurrounding (r,c) grid
         mines = fromIntegral $count Mine surrondingContent
 
--- | For a given Grid grid, and a given tuple (row, col, cont, stat),
---   update cell (row, col) with non-nothing cont and stat
-update :: (Int, Int) -> (Maybe Content, Maybe Status) -> Grid -> Grid
-update _ (Nothing, Nothing) grid = grid
-update (r, c) (cont, stat) grid = Grid rows' (size grid)
-    where
-        cell  = rows grid !! r !! c
-        cont' = fromMaybe (content cell) cont
-        stat' = fromMaybe (status cell) stat
-        rows' = rows grid !!!= (r,c, Cell cont' stat')
 
-setCellStatus :: Status -> (Int, Int) -> Grid -> Maybe Grid
-setCellStatus stat (row, col) grid
-    | status  cell == Open = Nothing
-    | status  cell == stat = Nothing
-    | otherwise = Just $ update (row, col) (Nothing, Just stat) grid
-    where cell = rows grid !! row !! col
+updateContent :: Content -> (Int, Int) -> Grid -> Grid
+updateContent co' (r,c) grid =
+    Grid (rows grid !!!= (r, c, Cell co' st)) $size grid
+    where (_,st) = getCell (r,c) grid
+
+updateStatus :: Status -> (Int, Int) -> Grid -> Maybe Grid
+updateStatus st' (r,c) grid
+    | st == Open  = Nothing
+    | st == st'   = Nothing
+    | otherwise   = Just $Grid (rows grid !!!= (r, c, Cell co st')) $size grid
+    where (co,st) = getCell (r,c) grid
 
 openCell :: (Int, Int) -> Grid -> Maybe Grid
-openCell =  setCellStatus Open
+openCell =  updateStatus Open
 
 flagCell :: (Int, Int) -> Grid -> Maybe Grid
-flagCell =  setCellStatus Flagged
+flagCell =  updateStatus Flagged
 
 unflagCell :: (Int, Int) -> Grid -> Maybe Grid
-unflagCell =  setCellStatus Closed
+unflagCell =  updateStatus Closed
