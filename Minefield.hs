@@ -145,6 +145,12 @@ updateStatus st' (r,c) grid
 openCell :: (Int, Int) -> Grid -> Maybe Grid
 openCell = updateStatus Open
 
+openCells :: [(Int,Int)] -> Grid -> Maybe Grid
+openCells l grid 
+    | null l = Just grid
+    | otherwise = maybe Nothing (openCells (drop 1 l)) grid'
+    where grid' = openCell (head l) grid
+
 flagCell :: (Int, Int) -> Grid -> Maybe Grid
 flagCell = updateStatus Flagged
 
