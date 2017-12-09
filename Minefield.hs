@@ -67,7 +67,7 @@ showGridTop grid =  "   " ++ (concat . showGridBar . snd . size) grid ++ "\n"
 
 -- | Given a size (width, height), create a grid with no mines
 emptyGrid :: (Int, Int) -> Grid
-emptyGrid (h, w) = Grid rows (h, w) 0
+emptyGrid (h, w) = Grid rows (h, w)
    where rows = replicate h $ replicate w $ Cell Empty Open
 
 -- | Given a Grid, get a list of all Cells
@@ -119,7 +119,7 @@ makeGridNumeric (r,c) grid
 --   update cell (row, col) with non-nothing cont and stat
 update :: (Int, Int) -> (Maybe Content, Maybe Status) -> Grid -> Grid
 update _ (Nothing, Nothing) grid = grid
-update (r, c) (cont, stat) grid = Grid rows' (size grid) (mines grid)
+update (r, c) (cont, stat) grid = Grid rows' (size grid)
     where
         cell  = rows grid !! r !! c
         cont' = fromMaybe (content cell) cont
