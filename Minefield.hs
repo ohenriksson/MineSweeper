@@ -45,36 +45,37 @@ data Grid = Grid { rows :: [[Cell]], size :: (Int,Int)}
 instance Show Grid where
     show grid = showGridTop grid ++ showGridRows grid
 
--- | Make size strings of increamenting numbers, each string of 3 characters 
+-- | Help functions to show grid.
 showGridBar :: Int -> [String]
 showGridBar size = map showGridTick [1..size]
-
+showGridRow :: Int -> [Cell] -> String
+showGridRow n cells = showGridTick n ++ concatMap show cells ++ "\n"
+showGridRows :: Grid -> String
+showGridRows grid = (concatMap (uncurry showGridRow) . zip [1..n] . rows) grid 
+    where (n, _) = size grid
 showGridTick :: Int -> String 
 showGridTick n 
     | n < 10    = " " ++ show n ++ " "
     | n < 100   = " " ++ show n
     | otherwise = show n
-
-showGridRow :: Int -> [Cell] -> String
-showGridRow n cells = showGridTick n ++ concatMap show cells ++ "\n"
-
-showGridRows :: Grid -> String
-showGridRows grid = (concatMap (uncurry showGridRow) . zip [1..n] . rows) grid 
-    where (n, _) = size grid
-
 showGridTop :: Grid -> String
 showGridTop grid =  "   " ++ (concat . showGridBar . snd . size) grid ++ "\n"
 
--- | Given a size (width, height), create a grid with no mines
+-- | Given a grid, return number of mines it contains.
+countMines :: Grid -> Int
+countMines = count Mine . map content . getCells
+
+-- | Given a size (width, height), create a grid with no mines.
 emptyGrid :: (Int, Int) -> Grid
 emptyGrid (h, w) = Grid rows (h, w)
    where rows = replicate h $ replicate w $ Cell Empty Open
 
+-- | Given a coordinate and a grid, return content and status of cell
 getCell :: (Int,Int) -> Grid -> (Content,Status)
 getCell (r,c) grid = (content cell, status cell) 
     where cell = rows grid !! r !! c 
 
--- | Given a Grid, get a list of all Cells
+-- | Given a Grid, get a list of all Cells.
 getCells :: Grid -> [Cell] 
 getCells = concat . rows
 
@@ -133,10 +134,10 @@ updateStatus st' (r,c) grid
     where (co,st) = getCell (r,c) grid
 
 openCell :: (Int, Int) -> Grid -> Maybe Grid
-openCell =  updateStatus Open
+openCell = updateStatus Open
 
 flagCell :: (Int, Int) -> Grid -> Maybe Grid
-flagCell =  updateStatus Flagged
+flagCell = updateStatus Flagged
 
 unflagCell :: (Int, Int) -> Grid -> Maybe Grid
-unflagCell =  updateStatus Closed
+unflagCell = updateStatus Closed
