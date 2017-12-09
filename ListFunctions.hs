@@ -18,6 +18,9 @@ import System.Random
     | otherwise = ll !!= (r,l)
     where l = (ll !! r) !!= (c,x)
 
+sumTuple :: (Num a) => (a,a) -> (a,a) -> (a,a)
+sumTuple (x1,y1) (x2,y2) = (x1+x2,y1+y2) 
+
 -- | For two given lists, return the cartesian product
 cartesian :: [a] -> [b] -> [(a,b)]
 cartesian xs ys = [(x,y) | x <- xs, y <- ys]
