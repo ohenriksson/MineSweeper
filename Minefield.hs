@@ -119,10 +119,7 @@ makeGridMines mp = updateContent Mine (row, col) . makeGridMines mp'
 
 makeGridNumerics :: Grid -> Grid
 makeGridNumerics grid = foldr makeGridNumeric grid nonMines 
-    where
-        (h,w) = size grid
-        cells = cartesian [0..(h-1)] [0..(w-1)] `zip` getCells grid 
-        nonMines = map fst $filter ((/=) Mine . content . snd) cells
+    where nonMines = positions isNotMine grid
 
 makeGridNumeric :: (Int, Int) -> Grid -> Grid
 makeGridNumeric (r,c) grid 
@@ -140,6 +137,10 @@ openCells l grid
     | null l = Just grid
     | otherwise = maybe Nothing (openCells (drop 1 l)) grid'
     where grid' = openCell (head l) grid
+
+positions :: (Cell -> Bool) -> Grid -> [(Int,Int)]
+positions f grid = map snd . filter (f . fst) $ getCells grid `zip` allPos
+    where allPos = cartesian [0..fst (size grid)-1] [0.. snd (size grid)-1]
 
 unflagCell :: (Int, Int) -> Grid -> Maybe Grid
 unflagCell = updateStatus Closed

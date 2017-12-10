@@ -82,38 +82,28 @@ prop_getSurrounding_otherSizes grid = w >= 4 && h >= 4 ==>
     | (r,c) <- [(1,1), (1,w-2), (h-2,1), (h-2,w-2), (h`div`2,w`div`2)]]
     where (h,w) = size grid 
 
-prop_isAllOpen_truePositive :: Grid -> Property
-prop_isAllOpen_truePositive grid = w >= 1 && h >= 1 ==>
+prop_isAllOpen_truePositive :: Grid -> Bool
+prop_isAllOpen_truePositive grid =
     isAllOpen $fromJust $openCells nonMines grid
-    where
-        (h,w) = size grid
-        nonMines = map snd . filter (isNotMine . fst)
-                   $ getCells grid `zip` cartesian [0..h-1] [0..w-1]
+    where nonMines = positions isNotMine grid
 
 prop_isAllOpen_trueNegative :: Grid -> Int -> Property
 prop_isAllOpen_trueNegative grid n =
-    w >= 1 && h >= 1 && n >= 0 && n < countMines grid - 1 ==>
-        not $isAllOpen $fromJust $openCells nonMines' grid
+    n >= 0 && n < h*w - countMines grid ==>
+        not $isAllOpen $fromJust $openCells nonMines grid
+    where 
+        (h,w) = size grid
+        (_,nonMines,_,_) = pop n $positions isNotMine grid
+
+prop_isLost_truePositive :: Grid -> Int -> Property
+prop_isLost_truePositive grid n =
+    n >= 0 && n < countMines grid ==>
+        isLost $fromJust $openCell (mines !! n) grid
     where
         (h,w) = size grid
-        nonMines  = map snd . filter (isNotMine . fst)
-                    $ getCells grid `zip` cartesian [0..h-1] [0..w-1]
-        (_,nonMines',_,_) = pop n nonMines
+        mines = positions isMine grid
 
-
-
--- | Test correct update in grid
--- TODO prop_update_correct :: Grid ->
-
--- | Test test setCell
--- TODO 
-
--- | Test nonMines
-
--- | Test isLostCell
-
--- | Test isLost
-
--- | Test isOpen
-
--- | Test isAllOpen
+prop_isLost_trueNegative :: Grid -> Bool
+prop_isLost_trueNegative grid =
+    not $isLost $fromJust $openCells nonMines grid
+    where nonMines = positions isNotMine grid
