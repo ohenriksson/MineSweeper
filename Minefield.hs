@@ -72,7 +72,7 @@ countMines = count isMine . getCells
 -- | Given a size (width, height), create a grid with no mines.
 emptyGrid :: (Int, Int) -> Grid
 emptyGrid (h, w) = Grid rows (h, w)
-   where rows = replicate h $ replicate w $ Cell Empty Open
+   where rows = replicate h $ replicate w $ Cell Empty Closed
 
 flagCell :: (Int, Int) -> Grid -> Maybe Grid
 flagCell = updateStatus Flagged

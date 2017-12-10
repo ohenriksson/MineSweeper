@@ -42,11 +42,11 @@ prop_emptyGrid_allClosedEmpty (w,h) = w >= 0 && h >= 0 ==>
     where grid = emptyGrid (w,h)
 
 prop_emptyGrid_size :: (Int,Int) -> Property
-prop_emptyGrid_size (w,h) = w >= 0 && h >= 0 ==>
+prop_emptyGrid_size (h,w) = w > 0 && h > 0 ==>
     length (rows grid) == h
     && and [length r == w | r <- rows grid]
-    && size grid == (w,h)
-    where grid = emptyGrid (w,h)
+    && size grid == (h,w)
+    where grid = emptyGrid (h,w)
 
 prop_emptyGrid_noMines :: (Int,Int) -> Property
 prop_emptyGrid_noMines (w,h) = w >= 1 && h >= 1 ==>
