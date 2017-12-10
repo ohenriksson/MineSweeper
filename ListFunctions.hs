@@ -25,9 +25,9 @@ sumTuple (x1,y1) (x2,y2) = (x1+x2,y1+y2)
 cartesian :: [a] -> [b] -> [(a,b)]
 cartesian xs ys = [(x,y) | x <- xs, y <- ys]
 
--- | Count occurances of given element in given list
-count :: (Eq a) => a -> [a] -> Int
-count x = length . filter (x ==)
+-- | Count occurances of given a function in given list
+count :: (Eq a) => (a -> Bool) -> [a] -> Int
+count f = length . filter f
 
 -- | For three given elements, return True if second element
 --   is equal to or larger than first, but small than third

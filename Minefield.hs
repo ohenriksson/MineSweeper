@@ -30,8 +30,12 @@ instance Show Cell where
     show (Cell (Numeric n) Open)   = " " ++ show n ++ " "
 
 -- | Representation of whether a Mine is in cell or close
-data Content = Numeric Integer | Mine | Empty
+data Content = Numeric Int | Mine | Empty
                deriving (Eq)
+
+fromNumeric :: Content -> Int
+fromNumeric (Numeric n) = n
+fromNumeric _ = error "fromNumeric: Not numeric"
 
 -- | Representation of whether cell is open, closed or flaged by player
 data Status = Open | Closed | Flagged
@@ -63,7 +67,7 @@ showGridTop grid =  "   " ++ (concat . showGridBar . snd . size) grid ++ "\n"
 
 -- | Given a grid, return number of mines it contains.
 countMines :: Grid -> Int
-countMines = count Mine . map content . getCells
+countMines = count isMine . getCells
 
 -- | Given a size (width, height), create a grid with no mines.
 emptyGrid :: (Int, Int) -> Grid
@@ -90,6 +94,12 @@ getSurrounding (row,col) = concatMap (take3 col) . take3 row . rows
 isAllOpen :: Grid -> Bool
 isAllOpen = all isOpen . filter isNotMine . getCells
 
+isEmpty :: Cell -> Bool
+isEmpty = (==) Empty . content
+
+isNumeric :: Cell -> Bool
+isNumeric cell = not $ isEmpty cell || isMine cell
+
 -- | Test if any mine has been open
 isLost :: Grid -> Bool
 isLost = any isOpen . filter isMine . getCells
@@ -106,7 +116,7 @@ isOpen = (==) Open . status
 -- | Given an StdGen, a size, and a number of mines, make a random Minefield
 makeGrid :: StdGen -> (Int, Int) -> Int -> Grid
 makeGrid g (h, w) n
-    | any (0 >) [w,h,n] = error "makeGrid: Negative numbers forbidden."
+    | any (0 >) [w,h,n] = error "makeGrid: Negative orbidden."
     | (w*h) <= n        = error "makeGrid: Too many mines."
     | otherwise = makeGridNumerics
                   $makeGridMines mines (emptyGrid (h,w))
@@ -126,8 +136,8 @@ makeGridNumeric (r,c) grid
     | mines == 0 = grid
     | otherwise  = updateContent (Numeric mines) (r,c) grid
     where
-        surrondingContent = map content $getSurrounding (r,c) grid
-        mines = fromIntegral $count Mine surrondingContent
+        surronding = getSurrounding (r,c) grid
+        mines = count isMine surronding
 
 openCell :: (Int, Int) -> Grid -> Maybe Grid
 openCell = updateStatus Open

@@ -2,6 +2,11 @@ import Minefield
 import ListFunctions
 import Test.QuickCheck
 import Data.Maybe
+import System.Random
+
+instance Arbitrary StdGen where
+    arbitrary = do n <- arbitrary
+                   return (mkStdGen n)
 
 instance Arbitrary Cell where
     arbitrary = do 
@@ -20,7 +25,7 @@ instance Arbitrary Grid where
         height <- choose (2,50)
         width <- choose (2,50)
         rows <- vectorOf height (vectorOf width arbitrary)
-        let mines = length (filter ((Mine ==) . content) (concat rows))
+        let mines = count isMine (concat rows)
         let grid = Grid rows (height, width)
         return $ makeGridNumerics grid 
 
@@ -107,3 +112,28 @@ prop_isLost_trueNegative :: Grid -> Bool
 prop_isLost_trueNegative grid =
     not $isLost $fromJust $openCells nonMines grid
     where nonMines = positions isNotMine grid
+
+prop_makeGrid_mines :: StdGen -> (Int,Int) -> Int -> Property
+prop_makeGrid_mines g (h,w) n = 
+    all (0 < ) [w,h,n] &&  h*w > n ==>
+        n == countMines grid
+    where grid = makeGrid g (h,w) n
+
+prop_makeGrid_numerics :: StdGen -> (Int,Int) -> Int -> Property
+prop_makeGrid_numerics g (h,w) n = 
+    all (0 < ) [w,h,n] &&  h*w > n ==>
+        and [0 == count isMine e | e <- empties]
+        && and [fromNumeric ((fst . getCell p) grid) == count isMine e
+             | (p,e) <- numerics]
+    where 
+        grid = makeGrid g (h,w) n
+        empties = [getSurrounding p grid | p <- positions isEmpty grid]
+        numerics = [(p,getSurrounding p grid) | p <- positions isNumeric grid]
+
+prop_makeGrid_size :: StdGen -> (Int,Int) -> Int -> Property
+prop_makeGrid_size g (h,w) n = 
+    all (0 < ) [w,h,n] &&  h*w > n ==>
+        (h,w) == size grid
+        && h == length (rows grid)
+        && all (w ==) (map length (rows grid))
+    where grid = makeGrid g (h,w) n
