@@ -11,6 +11,9 @@ Portability :  portable | non-portable (<reason>)
 <module description starting at first column>
 -}
 
+-- Should export only countMines, isAllOpen, isLost, makeGrid,
+-- openCell, flagCell, unflagCell 
+
 module Minefield where
 
 import Data.Maybe
