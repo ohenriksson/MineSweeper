@@ -14,6 +14,7 @@ Portability :  portable | non-portable (<reason>)
 module RunGame where
 
 import Minefield
+import System.Random
 import Text.Read
 import Data.Char
 
@@ -28,24 +29,25 @@ runGame = do
 gameLoop :: IO ()
 gameLoop = do
   putStrLn "match 1, enter field size:"
-  g <- getGameGrid
-  playMatch g
+  f <- readInt
+  putStrLn "match 1, enter number of mines:"
+  m <- readInt
+  g <- newStdGen
+  let grid = makeGrid g (f,f) m
+  playMatch grid
   return ()
 
-
--- | let user input the minefield size
-getGameGrid :: IO Grid
-getGameGrid = do
+-- | read user input
+readInt :: IO Int
+readInt = do
   s <- getLine
-  let size = read s :: Int
-  let grid = emptyGrid (size,size)
-  return grid
-
+  let mines = read s :: Int
+  return mines
 
 
 -- | play one match, interact with user,
 playMatch :: Grid -> IO()
 playMatch mField = do
-  putStrLn (show mField)
+  print mField
   return ()
 --TODO: play
