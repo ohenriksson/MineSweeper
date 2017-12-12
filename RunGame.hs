@@ -19,6 +19,7 @@ import Text.Read
 import Data.Char
 import Data.Maybe
 import Data.List.Split
+import Control.Monad
 
 
 -- | start gameLoop on user input
@@ -37,7 +38,9 @@ gameLoop = do
   g <- newStdGen
   let grid = makeGrid g (f,f) m
   playMatch grid
-  return ()
+  putStrLn "play again? (y/n)"
+  s <- getLine
+  Control.Monad.when ( head s == 'y') gameLoop
 
 -- | read user input
 readInt :: IO Int
@@ -60,7 +63,6 @@ playMatch g | isLost g = putStrLn "you lost!"
   let x = read (s'!!1) :: Int
   let y = read (s'!!2) :: Int
   let g' = performAction action (x-1,y-1) g
-  print g'
   playMatch g'
 
 -- | perform an action on the minefield and return it
