@@ -143,13 +143,26 @@ makeGridNumeric (r,c) grid
         mines = count isMine surronding
 
 openCell :: (Int, Int) -> Grid -> Maybe Grid
-openCell = updateStatus Open
+openCell (r,c) grid
+    | cell == (Empty,Closed) = Just $foldr tryOpenCell (fromJust grid')
+                                $cartesian [r-1..r+1] [c-1..c+1]
+    | otherwise = grid'
+    where
+        cell = getCell (r,c) grid
+        grid' = updateStatus Open (r,c) grid
 
 openCells :: [(Int,Int)] -> Grid -> Maybe Grid
 openCells l grid 
-    | null l = Just grid
-    | otherwise = maybe Nothing (openCells (drop 1 l)) grid'
-    where grid' = openCell (head l) grid
+    | null l        = Just grid
+    | grid == grid' = Nothing
+    | otherwise     = Just grid'
+    where grid' = foldr tryOpenCell grid l
+
+tryOpenCell :: (Int, Int) -> Grid -> Grid
+tryOpenCell (r,c) grid 
+    | r<0 || c<0 || r>=h || c>=w = grid
+    | otherwise = fromMaybe grid $openCell (r,c) grid
+    where (h,w) = size grid
 
 positions :: (Cell -> Bool) -> Grid -> [(Int,Int)]
 positions f grid = map snd . filter (f . fst) $ getCells grid `zip` allPos
@@ -165,7 +178,8 @@ updateContent co' (r,c) grid =
 
 updateStatus :: Status -> (Int, Int) -> Grid -> Maybe Grid
 updateStatus st' (r,c) grid
-    | st == Open  = Nothing
-    | st == st'   = Nothing
+    | st == Open                   = Nothing
+    | st == st'                    = Nothing
+    | st == Flagged && st' == Open = Nothing
     | otherwise   = Just $Grid (rows grid !!!= (r, c, Cell co st')) $size grid
     where (co,st) = getCell (r,c) grid
