@@ -17,6 +17,8 @@ import Minefield
 import System.Random
 import Text.Read
 import Data.Char
+import Data.Maybe
+import Data.List.Split
 
 
 -- | start gameLoop on user input
@@ -47,15 +49,19 @@ readInt = do
 
 -- | play one match, interact with user,
 playMatch :: Grid -> IO()
-playMatch mField = do
-  print mField
+playMatch g = do
+  print g
   putStrLn "open: o x y, toggle flag: f x y"
   s <- getLine
-
-  print mField
+  let s' = splitOn " " s
+  let action = head (head s')
+  let x = read (s'!!1) :: Int
+  let y = read (s'!!2) :: Int
+  let g' = performAction action (x-1,y-1) g
+  print g'
   return ()
 
 -- | perform an action on the minefield and return it
 performAction :: Char -> (Int,Int) -> Grid -> Grid
-performAction 'o' (x,y) g = g
-performAction 'f' (x,y) g = g
+performAction 'o' (x,y) g = fromJust (openCell (x,y) g)
+performAction 'f' (x,y) g = fromJust (flagCell (x,y) g)
