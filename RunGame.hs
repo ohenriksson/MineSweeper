@@ -49,5 +49,13 @@ readInt = do
 playMatch :: Grid -> IO()
 playMatch mField = do
   print mField
+  putStrLn "open: o x y, toggle flag: f x y"
+  s <- getLine
+
+  print mField
   return ()
---TODO: play
+
+-- | perform an action on the minefield and return it
+performAction :: Char -> (Int,Int) -> Grid -> Grid
+performAction 'o' x y g = g
+performAction 'f' x y g = g
