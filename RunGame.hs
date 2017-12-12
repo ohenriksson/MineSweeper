@@ -57,5 +57,5 @@ playMatch mField = do
 
 -- | perform an action on the minefield and return it
 performAction :: Char -> (Int,Int) -> Grid -> Grid
-performAction 'o' x y g = g
-performAction 'f' x y g = g
+performAction 'o' (x,y) g = g
+performAction 'f' (x,y) g = g
