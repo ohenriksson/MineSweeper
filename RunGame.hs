@@ -49,7 +49,9 @@ readInt = do
 
 -- | play one match, interact with user,
 playMatch :: Grid -> IO()
-playMatch g = do
+playMatch g | isLost g = putStrLn "you lost!"
+            | isAllOpen g = putStrLn "you win!"
+            | otherwise = do
   print g
   putStrLn "open: o x y, toggle flag: f x y"
   s <- getLine
@@ -59,7 +61,7 @@ playMatch g = do
   let y = read (s'!!2) :: Int
   let g' = performAction action (x-1,y-1) g
   print g'
-  return ()
+  playMatch g'
 
 -- | perform an action on the minefield and return it
 performAction :: Char -> (Int,Int) -> Grid -> Grid
