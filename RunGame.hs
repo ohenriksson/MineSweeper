@@ -14,6 +14,8 @@ Portability :  portable | non-portable (<reason>)
 module RunGame where
 
 import Minefield
+import Text.Read
+import Data.Char
 
 
 -- | start gameLoop on user input
@@ -25,10 +27,25 @@ runGame = do
 -- | game loop, let user set up a new game and playMatch or exit.
 gameLoop :: IO ()
 gameLoop = do
-  putStrLn "match 1:"
+  putStrLn "match 1, enter field size:"
+  g <- getGameGrid
   playMatch g
-  where g = emptyGrid (4,4)
+  return ()
+
+
+-- | let user input the minefield size
+getGameGrid :: IO Grid
+getGameGrid = do
+  s <- getLine
+  let size = read s :: Int
+  let grid = emptyGrid (size,size)
+  return grid
+
+
 
 -- | play one match, interact with user,
 playMatch :: Grid -> IO()
-playMatch mField = putStrLn (show mField)
+playMatch mField = do
+  putStrLn (show mField)
+  return ()
+--TODO: play
