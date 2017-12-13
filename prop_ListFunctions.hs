@@ -5,13 +5,22 @@ import Test.QuickCheck
 -- | test (!!=) for correct insertion
 prop_insert_1d :: (Eq a) => [a] -> (Int,a) -> Property
 prop_insert_1d l (i,new) =
-  not (null l)
-  && i < length l
-  && i >= 0  ==>
+    i `elem` [0..length l-1] ==>
     l'!!i == new
     && length l == length l'
     where
       l' = l !!= (i,new)
+
+-- | test (!!!=) for correct insertion
+prop_insert_2d :: (Eq a) => [[a]] -> (Int,Int,a) ->  Property
+prop_insert_2d l (r,c,new) =
+  r `elem` [0..length l-1]
+  && c `elem` [0..length row-1] ==>
+  (l'!!r)!!c == new
+  && length l == length l'
+  where row = l!!r
+        l' = l !!!= (r,c,new)
+--TODO: quickcheck gives up
 
 
 -- | Test correct replacement in list
