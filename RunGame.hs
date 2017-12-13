@@ -67,4 +67,4 @@ playMatch g | isLost g = putStrLn "you lost!"
 -- | perform an action on the minefield and return it
 performAction :: Char -> (Int,Int) -> Grid -> Grid
 performAction 'o' (x,y) g = fromJust (openCell (x,y) g)
-performAction 'f' (x,y) g = fromJust (flagCell (x,y) g)
+performAction 'f' (x,y) g = fromJust (toggleFlag (x,y) g)
