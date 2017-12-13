@@ -12,7 +12,7 @@ Portability :  portable | non-portable (<reason>)
 -}
 
 -- Should export only countMines, isAllOpen, isLost, makeGrid,
--- openCell, flagCell, unflagCell 
+-- openCell, flagCell, unFlagCell
 
 module Minefield where
 
@@ -58,10 +58,10 @@ showGridBar size = map showGridTick [1..size]
 showGridRow :: Int -> [Cell] -> String
 showGridRow n cells = showGridTick n ++ concatMap show cells ++ "\n"
 showGridRows :: Grid -> String
-showGridRows grid = (concatMap (uncurry showGridRow) . zip [1..n] . rows) grid 
+showGridRows grid = (concatMap (uncurry showGridRow) . zip [1..n] . rows) grid
     where (n, _) = size grid
-showGridTick :: Int -> String 
-showGridTick n 
+showGridTick :: Int -> String
+showGridTick n
     | n < 10    = " " ++ show n ++ " "
     | n < 100   = " " ++ show n
     | otherwise = show n
@@ -77,16 +77,22 @@ emptyGrid :: (Int, Int) -> Grid
 emptyGrid (h, w) = Grid rows (h, w)
    where rows = replicate h $ replicate w $ Cell Empty Closed
 
+-- | given a position and a grid, toggle the flag on that cell.
+toggleFlag :: (Int,Int) -> Grid -> Maybe Grid
+toggleFlag (r,c) g | status == Flagged = unFlagCell (r,c) g
+                   | status == Closed = flagCell (r,c) g
+  where (cont,status) = getCell (r,c) g
+
 flagCell :: (Int, Int) -> Grid -> Maybe Grid
 flagCell = updateStatus Flagged
 
 -- | Given a coordinate and a grid, return content and status of cell
 getCell :: (Int,Int) -> Grid -> (Content,Status)
-getCell (r,c) grid = (content cell, status cell) 
-    where cell = rows grid !! r !! c 
+getCell (r,c) grid = (content cell, status cell)
+    where cell = rows grid !! r !! c
 
 -- | Given a Grid, get a list of all Cells.
-getCells :: Grid -> [Cell] 
+getCells :: Grid -> [Cell]
 getCells = concat . rows
 
 -- | Given coordinates p and a grid, return surrounding cell incl cell on p
@@ -127,15 +133,15 @@ makeGrid g (h, w) n
 
 makeGridMines :: [(Int,Int)] -> Grid -> Grid
 makeGridMines [] = nop
-makeGridMines mp = updateContent Mine (row, col) . makeGridMines mp' 
+makeGridMines mp = updateContent Mine (row, col) . makeGridMines mp'
     where ((row,col), mp', _, _) = pop 0 mp
 
 makeGridNumerics :: Grid -> Grid
-makeGridNumerics grid = foldr makeGridNumeric grid nonMines 
+makeGridNumerics grid = foldr makeGridNumeric grid nonMines
     where nonMines = positions isNotMine grid
 
 makeGridNumeric :: (Int, Int) -> Grid -> Grid
-makeGridNumeric (r,c) grid 
+makeGridNumeric (r,c) grid
     | mines == 0 = grid
     | otherwise  = updateContent (Numeric mines) (r,c) grid
     where
@@ -152,14 +158,14 @@ openCell (r,c) grid
         grid' = updateStatus Open (r,c) grid
 
 openCells :: [(Int,Int)] -> Grid -> Maybe Grid
-openCells l grid 
+openCells l grid
     | null l        = Just grid
     | grid == grid' = Nothing
     | otherwise     = Just grid'
     where grid' = foldr tryOpenCell grid l
 
 tryOpenCell :: (Int, Int) -> Grid -> Grid
-tryOpenCell (r,c) grid 
+tryOpenCell (r,c) grid
     | r<0 || c<0 || r>=h || c>=w = grid
     | otherwise = fromMaybe grid $openCell (r,c) grid
     where (h,w) = size grid
@@ -168,8 +174,8 @@ positions :: (Cell -> Bool) -> Grid -> [(Int,Int)]
 positions f grid = map snd . filter (f . fst) $ getCells grid `zip` allPos
     where allPos = cartesian [0..fst (size grid)-1] [0.. snd (size grid)-1]
 
-unflagCell :: (Int, Int) -> Grid -> Maybe Grid
-unflagCell = updateStatus Closed
+unFlagCell :: (Int, Int) -> Grid -> Maybe Grid
+unFlagCell = updateStatus Closed
 
 updateContent :: Content -> (Int, Int) -> Grid -> Grid
 updateContent co' (r,c) grid =
