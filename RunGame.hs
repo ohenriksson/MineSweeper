@@ -49,7 +49,6 @@ readInt = do
   let mines = read s :: Int
   return mines
 
-
 -- | play one match, interact with user,
 playMatch :: Grid -> IO()
 playMatch g | isLost g = putStrLn "you lost!"

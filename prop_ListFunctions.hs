@@ -4,8 +4,8 @@ import Test.QuickCheck
 
 -- | Test correct replacement in list
 prop_replaceInList :: [Int] -> [Int] -> Int -> Int -> Property
-prop_replaceInList l1 l2 old new = 
-    not (null l2) && old /= new ==> 
+prop_replaceInList l1 l2 old new =
+    not (null l2) && old /= new ==>
         l1 ++ [new] ++ l2 == l !!= (length l1, new)
     where l = l1 ++ [new] ++ l2
 
@@ -24,7 +24,7 @@ prop_inRange x =
 
 -- | Test correct values from pop
 prop_pop :: [Int] -> [Int] -> Int -> Property
-prop_pop l1 l2 x = 
+prop_pop l1 l2 x =
     not (null l2) ==>
         x' == x
         && l1' == l1
@@ -33,4 +33,4 @@ prop_pop l1 l2 x =
     where
         i = length l1
         l = l1 ++ [x] ++ l2
-        (x', l', l1', l2') = pop l i
+        (x', l', l1', l2') = pop i l
