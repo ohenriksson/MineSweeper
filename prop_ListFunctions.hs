@@ -2,6 +2,18 @@
 import ListFunctions
 import Test.QuickCheck
 
+-- | test (!!=) for correct insertion
+prop_insert_1d :: (Eq a) => [a] -> (Int,a) -> Property
+prop_insert_1d l (i,new) =
+  not (null l)
+  && i < length l
+  && i >= 0  ==>
+    l'!!i == new
+    && length l == length l'
+    where
+      l' = l !!= (i,new)
+
+
 -- | Test correct replacement in list
 prop_replaceInList :: [Int] -> [Int] -> Int -> Int -> Property
 prop_replaceInList l1 l2 old new =
