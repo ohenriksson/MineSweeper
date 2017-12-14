@@ -169,10 +169,18 @@ tryOpenCell (r,c) grid
     | r<0 || c<0 || r>=h || c>=w = grid
     | otherwise = fromMaybe grid $openCell (r,c) grid
     where (h,w) = size grid
+{--
+openAllCells :: Grid -> Grid
+openAllCells (rows,size) = fromMaybe (rows,size) newGrid
+  where newGrid = openCells [(i,i) | i<-[1..length (head size)]] (rows,size)
+--}
 
 positions :: (Cell -> Bool) -> Grid -> [(Int,Int)]
 positions f grid = map snd . filter (f . fst) $ getCells grid `zip` allPos
     where allPos = cartesian [0..fst (size grid)-1] [0.. snd (size grid)-1]
+
+allPositions :: Grid -> [(Int, Int)]
+allPositions grid = cartesian [0..fst (size grid)-1] [0.. snd (size grid)-1]
 
 unFlagCell :: (Int, Int) -> Grid -> Maybe Grid
 unFlagCell = updateStatus Closed

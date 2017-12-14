@@ -55,7 +55,11 @@ readInt = do
 
 -- | play one match, interact with user,
 playMatch :: Grid -> IO()
-playMatch g | isLost g = putStrLn "you lost!"
+playMatch g | isLost g = do
+  putStrLn "you lost!"
+  let g' = openCells (allPositions g) g
+  print g'
+  return ()
             | isAllOpen g = putStrLn "you win!"
             | otherwise = do
   print g
