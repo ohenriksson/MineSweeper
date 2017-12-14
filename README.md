@@ -5,10 +5,10 @@ A mine-sweeper game written in Haskell
  - [x] Choose size of board / number of mines
  - [x] Generate arbitrary board
  - [x] Command line UI
- - [ ] Play with mines visible or non-visible (for testing)
- - [ ] Property Testing
+ - [x] Property Testing
 
 ## Extended specifications: 
+ - [ ] Play with mines visible or non-visible (for testing)
  - [ ] Graphical user interface
  - [ ] Timer
  - [ ] How many mines left/used flags
