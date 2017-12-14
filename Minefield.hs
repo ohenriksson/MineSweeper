@@ -1,18 +1,11 @@
 {- |
 Module      :  $Header$
-Description :  <optional short text displayed on contents page>
-Copyright   :  (c) <Authors or Affiliations>
-License     :  <license>
+Description :  Data structure and game logics for Minesweeper
 
-Maintainer  :  irvin93d@gmail.com
-Stability   :  unstable | experimental | provisional | stable | frozen
-Portability :  portable | non-portable (<reason>)
-
-<module description starting at first column>
+Maintainer  :  irvin93d@gmail.com, o.henriksson@gmail.com
 -}
 
--- Should export only countMines, isAllOpen, isLost, makeGrid,
--- openCell, flagCell, unFlagCell
+-- TODO: Export only needed functions
 
 module Minefield where
 

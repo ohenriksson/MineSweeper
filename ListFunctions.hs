@@ -1,3 +1,13 @@
+{- |
+Module      :  $Header$
+Description :  List functions used in Minesweeper game
+
+Maintainer  :  irvin93d@gmail.com, o.henriksson@gmail.com
+-}
+
+-- TODO: Export only needed functions
+
+
 module ListFunctions where
 
 import System.Random
@@ -19,7 +29,7 @@ import System.Random
     where l = (ll !! r) !!= (c,x)
 
 sumTuple :: (Num a) => (a,a) -> (a,a) -> (a,a)
-sumTuple (x1,y1) (x2,y2) = (x1+x2,y1+y2) 
+sumTuple (x1,y1) (x2,y2) = (x1+x2,y1+y2)
 
 -- | For two given lists, return the cartesian product
 cartesian :: [a] -> [b] -> [(a,b)]
@@ -34,7 +44,7 @@ count f = length . filter f
 inRange :: (Eq a, Ord a) => a -> a -> a -> Bool
 inRange a b c = a <= b && b < c
 
--- | Return input 
+-- | Return input
 nop :: a -> a
 nop a = a
 

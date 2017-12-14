@@ -1,15 +1,13 @@
+
 {- |
 Module      :  $Header$
-Description :  <optional short text displayed on contents page>
-Copyright   :  (c) <Authors or Affiliations>
-License     :  <license>
+Description :  Runtime for Minesweeper gameplay
 
-Maintainer  :  irvin93d@gmail.com
-Stability   :  unstable | experimental | provisional | stable | frozen
-Portability :  portable | non-portable (<reason>)
-
-<module description starting at first column>
+Maintainer  :  irvin93d@gmail.com, o.henriksson@gmail.com
 -}
+
+-- TODO: Export only needed functions
+
 
 module RunGame where
 
@@ -57,7 +55,7 @@ readInt = do
 playMatch :: Grid -> IO()
 playMatch g | isLost g = do
   putStrLn "you lost!"
-  let g' = openCells (allPositions g) g
+  let g' = fromMaybe g $ openCells (allPositions g) g
   print g'
   return ()
             | isAllOpen g = putStrLn "you win!"
